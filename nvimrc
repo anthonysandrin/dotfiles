@@ -125,7 +125,7 @@ set backupdir=~/.nvim/backup//,.
 " Keymaps for colemak
 mapclear
 let mapleader=","
-nnoremap <BS> <c-w>h
+nnoremap <c-h> <c-w>h
 nnoremap n j|xnoremap n j|vnoremap n j|onoremap n j
 nnoremap N J
 nnoremap <c-n> <c-w>j

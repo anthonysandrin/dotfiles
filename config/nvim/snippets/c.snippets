@@ -1,0 +1,17 @@
+snippet once "#ifndef #define #endif"
+	#ifndef ${1:`toupper(expand('%:t:r'))`_H}
+	#define $1
+
+	$2
+
+	#endif // $1
+
+snippet struct "typedef struct { } Name;"
+	typedef struct {
+	  $2
+	} ${1:TypeName};
+
+snippet enum "typedef enum { } Name;"
+	typedef enum {
+	  $2
+	} ${1:TypeName};

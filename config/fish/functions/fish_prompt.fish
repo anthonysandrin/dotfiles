@@ -21,7 +21,7 @@ set __fish_git_prompt_char_upstream_behind '↓'
 
 function fish_prompt
     tput setaf 8
-    printf "╭─┨"
+    printf "┌─┨"
     tput setaf 9
     echo -n (whoami)
     tput setaf 11
@@ -34,8 +34,8 @@ function fish_prompt
     echo -n (prompt_long_pwd)
     tput setaf 8
     echo -n "┠"
-    echo -n (__fish_git_prompt "───┨%s"(tput setaf 8)"┠─")
-    echo "─╌┄"
-    printf "╰─▸"
+    echo -n (__fish_git_prompt "──┨%s"(tput setaf 8)"┠")
+    echo "─╼"
+    printf "└─╸"
     set_color normal
 end

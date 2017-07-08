@@ -1,0 +1,11 @@
+screen-256color-italic|screen with 256 colors and italic,
+  sitm=\E[3m, ritm=\E[23m,
+  use=screen-256color,
+
+tmux-256color-italic|tmux with 256 colors and italic,
+  sitm=\E[3m, ritm=\E[23m,
+  use=tmux-256color,
+
+xterm-256color-italic|xterm with 256 colors and italic,
+  sitm=\E[3m, ritm=\E[23m,
+  use=xterm-256color,

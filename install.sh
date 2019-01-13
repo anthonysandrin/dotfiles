@@ -5,9 +5,13 @@ echo "Copying .gitconfig to ~..."
 cp gitconfig ~/.gitconfig
 echo "Done copying .gitconfig to ~."
 
-echo "Installing temrinfo..."
+echo "Installing terminfo..."
 tic italic.terminfo
 echo "Done Installing temrinfo..."
+
+echo "Copying .tmux.conf to ~..."
+cp tmux.conf ~/.tmux.conf
+echo "Donecopying .tmux.conf to ~..."
 
 echo "Copying config files to ~/.config..."
 mkdir -p ~/.config

@@ -1,4 +1,6 @@
-"">>==--< Plugins (vim-plug ) >------------------------------------------==<<""
+" vim: foldmethod=marker
+
+" Plugins {{{
 
 call plug#begin('~/.local/share/nvim/plugged')
 
@@ -21,13 +23,16 @@ Plug 'airblade/vim-gitgutter'
 Plug 'rust-lang/rust.vim'
 
 " Language Server
-Plug 'autozimu/LanguageClient-neovim', { 'do': ':UpdateRemotePlugins' }
+Plug 'autozimu/LanguageClient-neovim', {
+    \ 'branch': 'next',
+    \ 'do': 'bash install.sh',
+    \ }
 
 " Fuzzy finder
 Plug 'junegunn/fzf', { 'dir': '~/.local/share/fzf', 'do': './install --all' }
 
 " Auto Complete
-Plug 'roxma/nvim-completion-manager'
+Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
 Plug 'ervandew/supertab'
 Plug 'chrisbra/unicode.vim'
 
@@ -39,7 +44,9 @@ Plug 'Shougo/echodoc.vim'
 
 call plug#end()
 
-"">>==--< General Vim Settings >-----------------------------------------==<<""
+"}}}
+
+" Vim Settings {{{
 
 " Enable syntax highlighting
 syntax on
@@ -116,7 +123,10 @@ augroup sign_group
     au BufWinEnter * exe "sign place 1337 line=1 name=empty_sign buffer=" . bufnr('%')
 augroup END
 
-"">>==--< Keymaps >------------------------------------------------------==<<""
+" }}}
+
+" Keymaps {{{
+
 mapclear
 let mapleader=","
 
@@ -199,7 +209,9 @@ xnoremap <leader>o :diffput<Return>:diffupdate<Return>
 nnoremap <leader>t :diffget<Return>:diffupdate<Return>
 xnoremap <leader>t :diffget<Return>:diffupdate<Return>
 
-"">>==--< Plugin Configuration >-----------------------------------------==<<""
+" }}}
+
+" Plugin Configuration {{{
 
 " Rainbow Configuration
 let g:rainbow_conf = {
@@ -277,3 +289,11 @@ let g:LanguageClient_serverCommands = {
   \ 'python': ['pyls'],
   \ 'rust': ['rls'] }
 au BufEnter *.py,*.rs LanguageClientStart
+let g:LanguageClient_hoverPreview = 'Never'
+
+" Deoplete Settings
+let g:deoplete#enable_at_startup = 1
+let g:deoplete#enable_smart_case = 1
+set completeopt=menuone,noinsert,noselect
+
+" }}}

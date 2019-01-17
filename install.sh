@@ -11,7 +11,11 @@ echo "Done Installing temrinfo..."
 
 echo "Copying .tmux.conf to ~..."
 cp tmux.conf ~/.tmux.conf
-echo "Donecopying .tmux.conf to ~..."
+echo "Done copying .tmux.conf to ~..."
+
+echo "Copying .clang-format to ~..."
+cp tmux.conf ~/.tmux.conf
+echo "Donec opying .clang-format to ~..."
 
 echo "Copying config files to ~/.config..."
 mkdir -p ~/.config

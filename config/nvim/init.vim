@@ -1,7 +1,6 @@
 " vim: foldmethod=marker
 
 " Plugins {{{
-
 call plug#begin('~/.local/share/nvim/plugged')
 
 " File browser
@@ -23,10 +22,7 @@ Plug 'airblade/vim-gitgutter'
 Plug 'rust-lang/rust.vim'
 
 " Language Server
-Plug 'autozimu/LanguageClient-neovim', {
-    \ 'branch': 'next',
-    \ 'do': 'bash install.sh',
-    \ }
+Plug 'autozimu/LanguageClient-neovim', { 'branch': 'next', 'do': 'bash install.sh' }
 
 " Fuzzy finder
 Plug 'junegunn/fzf', { 'dir': '~/.local/share/fzf', 'do': './install --all' }
@@ -42,11 +38,22 @@ Plug 'SirVer/ultisnips'
 " Documentation Viewer
 Plug 'Shougo/echodoc.vim'
 
+" Project local configuration
+Plug 'embear/vim-localvimrc'
+
+" Autoformatting
+Plug 'sbdchd/neoformat'
+
+" Latex file editing
+Plug 'lervag/vimtex'
+
 call plug#end()
+" }}}
 
-"}}}
+" Vim {{{
 
-" Vim Settings {{{
+" Enable unicode
+set encoding=utf-8
 
 " Enable syntax highlighting
 syntax on
@@ -86,6 +93,16 @@ function! SetTab(n)
 endfunction
 command! -nargs=1 Tab call SetTab(<args>)
 
+" Add command for clearing search and signs
+set expandtab
+function! Clear()
+  let @/ = ""
+  sign unplace *
+  sign define empty_sign
+  exe "sign place 1337 line=1 name=empty_sign buffer=" . bufnr('%')
+endfunction
+command! -nargs=0 Clear call Clear()
+
 " Use 2 space tabs
 call SetTab(2)
 
@@ -122,11 +139,9 @@ augroup sign_group
     au BufWinEnter * sign define empty_sign
     au BufWinEnter * exe "sign place 1337 line=1 name=empty_sign buffer=" . bufnr('%')
 augroup END
-
 " }}}
 
 " Keymaps {{{
-
 mapclear
 let mapleader=","
 
@@ -199,7 +214,7 @@ nnoremap <leader>D :bd!<Return>
 nnoremap <leader>p :FZF<Return>
 
 " Clear search using leader s
-nnoremap <leader>s :let @/ = ""<Return>
+nnoremap <leader>s :Clear<Return>
 
 " When in diff mode use leader o to accept our copy
 nnoremap <leader>o :diffput<Return>:diffupdate<Return>
@@ -208,12 +223,9 @@ xnoremap <leader>o :diffput<Return>:diffupdate<Return>
 " When in diff mode use leader t to accept their copy
 nnoremap <leader>t :diffget<Return>:diffupdate<Return>
 xnoremap <leader>t :diffget<Return>:diffupdate<Return>
-
 " }}}
 
-" Plugin Configuration {{{
-
-" Rainbow Configuration
+" Rainbow {{{
 let g:rainbow_conf = {
   \ 'guifgs': [6, 1],
   \ 'ctermfgs': [6, 1],
@@ -230,13 +242,13 @@ let g:rainbow_conf = {
   \       'start=/(/ end=/)/ fold',
   \       'start=/\[/ end=/\]/ fold',
   \       'start=/{/ end=/}/ fold',
-  \       'start=/</ end=/>/ fold'
   \     ],
   \   },
   \ } }
 let g:rainbow_active = 1
+" }}}
 
-" NERDTree Configuration
+" NERDTree {{{
 let g:NERDTreeMouseMode = 2
 let g:NERDTreeShowHidden = 1
 
@@ -254,8 +266,9 @@ augroup CloseIfOnlyControlWinLeft
   au!
   au BufEnter * call s:CloseIfOnlyControlWinLeft()
 augroup END
+" }}}
 
-" FZF Configuration
+" FZF {{{
 let g:fzf_layout = { 'down': '~20%' }
 let g:fzf_colors = {
   \ 'fg':      ['fg', 'Normal'],
@@ -270,30 +283,81 @@ let g:fzf_colors = {
   \ 'marker':  ['fg', 'Keyword'],
   \ 'spinner': ['fg', 'Label'],
   \ 'header':  ['fg', 'Comment'] }
+" }}}
 
-" Airline Configuration
+" Airline {{{
 let g:airline_powerline_fonts = 1
 let g:airline#extensions#tabline#enabled = 1
 let g:airline#extensions#tabline#formatter = 'unique_tail_improved'
 let g:airline#extensions#tabline#buffer_min_count = 2
+let g:airline#extensions#languageclient#enabled = 1
+" }}}
 
-" SuperTab Configuration
+" SuperTab {{{
 let g:SuperTabDefaultCompletionType = "<c-n>"
+" }}}
 
-" UltiSnips Configuration
+" UltiSnips {{{
 let g:UltiSnipsSnippetsDir = "~/.config/nvim/snippets"
 let g:UltiSnipsJumpForwardTrigger = "<tab>"
+" }}}
 
-" Language Server Configuration
+" Language Server {{{
 let g:LanguageClient_serverCommands = {
   \ 'python': ['pyls'],
-  \ 'rust': ['rls'] }
-au BufEnter *.py,*.rs LanguageClientStart
-let g:LanguageClient_hoverPreview = 'Never'
+  \ 'rust': ['rls'],
+  \ 'cpp': ['clangd'],
+  \ }
+let g:LanguageClient_autoStart = 1
+let g:LanguageClient_diagnosticsDisplay = {
+  \ 1: {
+  \ 'name': 'Error',
+  \ 'texthl': 'ALEError',
+  \ 'signText': '✖',
+  \ 'signTexthl': 'ALEErrorSign',
+  \ },
+  \ 2: {
+  \ 'name': 'Warning',
+  \ 'texthl': 'ALEWarning',
+  \ 'signText': 'W',
+  \ 'signTexthl': 'ALEWarningSign',
+  \ },
+  \ 3: {
+  \ 'name': 'Information',
+  \ 'texthl': 'ALEInfo',
+  \ 'signText': 'ℹ',
+  \ 'signTexthl': 'ALEInfoSign',
+  \ },
+  \ 4: {
+  \ 'name': 'Hint',
+  \ 'texthl': 'ALEInfo',
+  \ 'signText': 'ℹ',
+  \ 'signTexthl': 'ALEInfoSign',
+  \ },
+  \ }
+" }}}
 
-" Deoplete Settings
+" localvimrc {{{
+let g:localvimrc_persistent = 1
+" }}}
+
+" Deoplete {{{
 let g:deoplete#enable_at_startup = 1
 let g:deoplete#enable_smart_case = 1
 set completeopt=menuone,noinsert,noselect
+" }}}
+
+" Neoformat {{{
+augroup fmt
+  autocmd!
+  autocmd BufWritePre * undojoin | Neoformat
+augroup END
+" }}}
+
+" Vimtex {{{
+
+let g:vimtex_compiler_progname = 'nvr'
+let g:vimtex_view_method = 'zathura'
+let g:vimtex_quickfix_enabled = 0
 
 " }}}

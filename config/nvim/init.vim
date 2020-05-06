@@ -1,10 +1,5 @@
-" vim: foldmethod=marker
-
 " Plugins {{{
 call plug#begin('~/.local/share/nvim/plugged')
-
-" File browser
-Plug 'scrooloose/nerdtree'
 
 " Syntax highlighting
 Plug 'noahfrederick/vim-noctu'
@@ -20,15 +15,15 @@ Plug 'airblade/vim-gitgutter'
 
 " Languages
 Plug 'rust-lang/rust.vim'
+Plug 'reasonml-editor/vim-reason-plus'
 
 " Language Server
-Plug 'autozimu/LanguageClient-neovim', { 'branch': 'next', 'do': 'bash install.sh' }
+Plug 'neovim/nvim-lsp'
 
 " Fuzzy finder
 Plug 'junegunn/fzf', { 'dir': '~/.local/share/fzf', 'do': './install --all' }
 
 " Auto Complete
-Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
 Plug 'ervandew/supertab'
 Plug 'chrisbra/unicode.vim'
 
@@ -51,14 +46,11 @@ call plug#end()
 " }}}
 
 " Vim {{{
-
 " Enable unicode
 set encoding=utf-8
 
 " Enable syntax highlighting
 syntax on
-silent! colorscheme noctu
-highlight Comment cterm=italic
 
 " Keep buffers open
 set hidden
@@ -92,16 +84,6 @@ function! SetTab(n)
   let &softtabstop=a:n
 endfunction
 command! -nargs=1 Tab call SetTab(<args>)
-
-" Add command for clearing search and signs
-set expandtab
-function! Clear()
-  let @/ = ""
-  sign unplace *
-  sign define empty_sign
-  exe "sign place 1337 line=1 name=empty_sign buffer=" . bufnr('%')
-endfunction
-command! -nargs=0 Clear call Clear()
 
 " Use 2 space tabs
 call SetTab(2)
@@ -141,14 +123,39 @@ augroup sign_group
 augroup END
 " }}}
 
+" Syntax Highlighting {{{
+silent! colorscheme noctu
+highlight Comment cterm=italic
+
+" Lsp
+hi LspDiagnosticsError ctermfg=1
+hi LspDiagnosticsWarning ctermfg=3
+hi LspDiagnosticInformation ctermfg=7 cterm=italic
+hi LspDiagnosticHint ctermfg=2 cterm=italic
+hi LspReferenceText ctermfg=7 cterm=italic
+hi LspReferenceRead ctermfg=7 cterm=italic
+hi LspReferenceWrite ctermfg=7 cterm=italic
+
+" Fix filetype associations
+augroup filetypedetect
+    au! BufRead,BufNewFile *.cppm       setfiletype cpp
+augroup END
+" }}}
+
 " Keymaps {{{
 mapclear
 let mapleader=","
 
 " Colemak: Movement keys
-nnoremap n j|xnoremap n j|vnoremap n j|onoremap n j
-nnoremap e k|xnoremap e k|vnoremap e k|onoremap e k
-nnoremap i l|xnoremap i l|vnoremap i l|onoremap i l
+noremap n j
+noremap e k
+noremap i l
+
+" Colemak: Move faster by holding shift
+noremap H 10h
+noremap N 10j
+noremap E 10k
+noremap I 10l
 
 " Colemak: Switch panes using ctrl-{h,n,e,i}
 nnoremap <c-h> <c-w>h
@@ -158,14 +165,6 @@ nnoremap <c-i> <c-w>l
 nnoremap <c-w>n <c-w>j
 nnoremap <c-w>e <c-w>k
 nnoremap <c-w>i <c-w>l
-
-" On OSX, ctrl-h is remmapped to backspace
-if has("unix")
-  let s:uname = system("uname -s")
-  if s:uname =~ 'Darwin\n'
-    nnoremap <bs> <c-w>h
-  endif
-endif
 
 " Colemak: Use r for 'inside' operations insted since i is now a movement key
 onoremap r i
@@ -186,13 +185,7 @@ nnoremap J T
 nnoremap k n
 nnoremap K N
 
-" Colemak: Move faster by holding shift
-nnoremap H 10h|xnoremap H 10h|vnoremap H 10h|onoremap H 10h
-nnoremap N 10j|xnoremap N 10j|vnoremap N 10j|onoremap N 10j
-nnoremap E 10k|xnoremap E 10k|vnoremap E 10k|onoremap E 10k
-nnoremap I 10l|xnoremap I 10l|vnoremap I 10l|onoremap I 10l
-
-" Colemak: Map m to merge lines since J is now used to move faster
+" Colemak: Map m to merge lines since N is now used to move faster
 nnoremap m J
 
 " Colemak: Map b to set (book)mark since m is now used to merge lines
@@ -204,7 +197,11 @@ nnoremap U <c-r>
 " Shift Q to replay a macro to match q for record macro
 nnoremap Q @
 
+" Press enter to save
+nnoremap <Return> :w<Return>
+
 " Buffer management
+nnoremap <leader>f <cmd>Vex<Return>
 nnoremap <leader>i :bn<Return>
 nnoremap <leader>h :bp<Return>
 nnoremap <leader>d :bp\|bd #<Return>
@@ -213,16 +210,21 @@ nnoremap <leader>D :bd!<Return>
 " Ctrl-P like search using FZF
 nnoremap <leader>p :FZF<Return>
 
-" Clear search using leader s
-nnoremap <leader>s :Clear<Return>
-
 " When in diff mode use leader o to accept our copy
-nnoremap <leader>o :diffput<Return>:diffupdate<Return>
-xnoremap <leader>o :diffput<Return>:diffupdate<Return>
+noremap <leader>o :diffput<Return>:diffupdate<Return>
 
 " When in diff mode use leader t to accept their copy
-nnoremap <leader>t :diffget<Return>:diffupdate<Return>
-xnoremap <leader>t :diffget<Return>:diffupdate<Return>
+noremap <leader>t :diffget<Return>:diffupdate<Return>
+
+nnoremap <silent> gb <C-o>
+nnoremap <silent> gd <cmd>lua vim.lsp.buf.declaration()<CR>
+nnoremap <silent> gD <cmd>lua vim.lsp.buf.definition()<CR>
+nnoremap <silent> gi <cmd>lua vim.lsp.buf.implementation()<CR>
+nnoremap <silent> gt <cmd>lua vim.lsp.buf.type_definition()<CR>
+nnoremap <silent> gr <cmd>lua vim.lsp.buf.references()<CR>
+nnoremap <silent> gs <cmd>lua vim.lsp.buf.document_symbol()<CR>
+nnoremap <silent> gh <cmd>lua vim.lsp.buf.hover()<CR>
+nnoremap <silent> gs <cmd>lua vim.lsp.buf.signature_help()<CR>
 " }}}
 
 " Rainbow {{{
@@ -248,24 +250,25 @@ let g:rainbow_conf = {
 let g:rainbow_active = 1
 " }}}
 
-" NERDTree {{{
-let g:NERDTreeMouseMode = 2
-let g:NERDTreeShowHidden = 1
+" Netrw {{{
+let g:netrw_altv = 1
+let g:netrw_banner = 0
+let g:netrw_browse_split = 4
+let g:netrw_fastbrowse = 0
+let g:netrw_liststyle = 3
+let g:netrw_winsize = 25
 
-" Quit when the only window open is NERDTree
-function! s:CloseIfOnlyControlWinLeft()
-  if winnr("$") != 1
-    return
-  endif
-  if (exists("t:NERDTreeBufName") && bufwinnr(t:NERDTreeBufName) != -1)
-        \ || &buftype == 'quickfix'
-    q
-  endif
-endfunction
-augroup CloseIfOnlyControlWinLeft
-  au!
-  au BufEnter * call s:CloseIfOnlyControlWinLeft()
+
+augroup netrw_mapping
+    autocmd!
+    autocmd filetype netrw call NetrwMapping()
 augroup END
+
+function! NetrwMapping()
+    noremap <buffer> i l
+    noremap <buffer> I 10l
+    setl bufhidden=wipe
+endfunction
 " }}}
 
 " FZF {{{
@@ -290,7 +293,6 @@ let g:airline_powerline_fonts = 1
 let g:airline#extensions#tabline#enabled = 1
 let g:airline#extensions#tabline#formatter = 'unique_tail_improved'
 let g:airline#extensions#tabline#buffer_min_count = 2
-let g:airline#extensions#languageclient#enabled = 1
 " }}}
 
 " SuperTab {{{
@@ -302,62 +304,27 @@ let g:UltiSnipsSnippetsDir = "~/.config/nvim/snippets"
 let g:UltiSnipsJumpForwardTrigger = "<tab>"
 " }}}
 
-" Language Server {{{
-let g:LanguageClient_serverCommands = {
-  \ 'python': ['pyls'],
-  \ 'rust': ['rls'],
-  \ 'cpp': ['clangd'],
-  \ }
-let g:LanguageClient_autoStart = 1
-let g:LanguageClient_diagnosticsDisplay = {
-  \ 1: {
-  \ 'name': 'Error',
-  \ 'texthl': 'ALEError',
-  \ 'signText': '✖',
-  \ 'signTexthl': 'ALEErrorSign',
-  \ },
-  \ 2: {
-  \ 'name': 'Warning',
-  \ 'texthl': 'ALEWarning',
-  \ 'signText': 'W',
-  \ 'signTexthl': 'ALEWarningSign',
-  \ },
-  \ 3: {
-  \ 'name': 'Information',
-  \ 'texthl': 'ALEInfo',
-  \ 'signText': 'ℹ',
-  \ 'signTexthl': 'ALEInfoSign',
-  \ },
-  \ 4: {
-  \ 'name': 'Hint',
-  \ 'texthl': 'ALEInfo',
-  \ 'signText': 'ℹ',
-  \ 'signTexthl': 'ALEInfoSign',
-  \ },
-  \ }
-" }}}
-
 " localvimrc {{{
 let g:localvimrc_persistent = 1
-" }}}
-
-" Deoplete {{{
-let g:deoplete#enable_at_startup = 1
-let g:deoplete#enable_smart_case = 1
-set completeopt=menuone,noinsert,noselect
 " }}}
 
 " Neoformat {{{
 augroup fmt
   autocmd!
-  autocmd BufWritePre * undojoin | Neoformat
+  autocmd BufWritePre * Neoformat
 augroup END
+
+let g:neoformat_enabled_javascript = []
 " }}}
 
 " Vimtex {{{
-
 let g:vimtex_compiler_progname = 'nvr'
 let g:vimtex_view_method = 'zathura'
 let g:vimtex_quickfix_enabled = 0
-
 " }}}
+
+" Source init.lua {{{
+lua require 'init'.init()
+" }}}
+
+" vim: foldmethod=marker
